@@ -1,4 +1,4 @@
-/* آخر-تحديث: 2026-08-10 17:47:28 */
+/* آخر-تحديث: 2026-08-10 18:26:58 */
 import { supabase } from './supabaseClient.js';
 import { applyStaticTranslations, toggleLang, t } from './i18n.js';
 import { recomputeFamily, findMismatchedStudents } from './pricing.js';
@@ -623,6 +623,199 @@ document.getElementById('checkMismatchBtn').addEventListener('click', async () =
   }
 });
 
+// ------------------------- أولياء الأمور -------------------------
+
+async function loadGuardiansTab() {
+  const { data, error } = await supabase
+    .from('guardians')
+    .select('id, full_name, phone, email')
+    .order('created_at', { ascending: false });
+
+  const listEl = document.getElementById('guardiansList');
+  if (error) { listEl.innerHTML = `<p class="error">${error.message}</p>`; return; }
+  listEl.innerHTML = (data ?? []).map(g => `
+    <div class="card">
+      <strong>${g.full_name}</strong>
+      <div class="muted">${g.phone ?? ''} ${g.email ? '— ' + g.email : ''}</div>
+    </div>
+  `).join('') || '<p class="muted">مفيش أولياء أمور مسجلين لسه</p>';
+}
+
+document.getElementById('gAddBtn').addEventListener('click', async () => {
+  const full_name = document.getElementById('gName').value.trim();
+  const phone = document.getElementById('gPhone').value.trim();
+  const email = document.getElementById('gEmail').value.trim();
+  if (!full_name) { alert('اكتب الاسم'); return; }
+  const { error } = await supabase.from('guardians').insert({ school_id: currentSchoolId, full_name, phone: phone || null, email: email || null });
+  if (error) { alert(error.message); return; }
+  document.getElementById('gName').value = '';
+  document.getElementById('gPhone').value = '';
+  document.getElementById('gEmail').value = '';
+  await loadGuardiansTab();
+});
+
+// ------------------------- التقويم -------------------------
+
+async function loadCalendarTab() {
+  const { data, error } = await supabase
+    .from('school_calendar')
+    .select('id, description, from_date, to_date')
+    .order('from_date', { ascending: true });
+
+  const listEl = document.getElementById('calendarList');
+  if (error) { listEl.innerHTML = `<p class="error">${error.message}</p>`; return; }
+  listEl.innerHTML = (data ?? []).map(c => `
+    <div class="card">
+      <strong>${c.description}</strong>
+      <div class="muted">${c.from_date}${c.to_date && c.to_date !== c.from_date ? ' — ' + c.to_date : ''}</div>
+    </div>
+  `).join('') || '<p class="muted">مفيش أحداث مضافة لسه</p>';
+}
+
+document.getElementById('calAddBtn').addEventListener('click', async () => {
+  const description = document.getElementById('calDesc').value.trim();
+  const from_date = document.getElementById('calFrom').value;
+  const to_date = document.getElementById('calTo').value || null;
+  if (!description || !from_date) { alert('اكتب الوصف والتاريخ'); return; }
+  const { error } = await supabase.from('school_calendar').insert({ school_id: currentSchoolId, description, from_date, to_date });
+  if (error) { alert(error.message); return; }
+  document.getElementById('calDesc').value = '';
+  await loadCalendarTab();
+});
+
+// ------------------------- الإعلانات -------------------------
+
+async function loadAnnouncementsTab() {
+  const { data, error } = await supabase
+    .from('announcements')
+    .select('id, title, body, created_at')
+    .order('created_at', { ascending: false });
+
+  const listEl = document.getElementById('announcementsList');
+  if (error) { listEl.innerHTML = `<p class="error">${error.message}</p>`; return; }
+  listEl.innerHTML = (data ?? []).map(a => `
+    <div class="card">
+      <strong>${a.title}</strong>
+      <div class="muted">${a.body ?? ''}</div>
+    </div>
+  `).join('') || '<p class="muted">مفيش إعلانات لسه</p>';
+}
+
+document.getElementById('annAddBtn').addEventListener('click', async () => {
+  const title = document.getElementById('annTitle').value.trim();
+  const body = document.getElementById('annBody').value.trim();
+  if (!title) { alert('اكتب عنوان'); return; }
+  const { error } = await supabase.from('announcements').insert({ school_id: currentSchoolId, title, body: body || null });
+  if (error) { alert(error.message); return; }
+  document.getElementById('annTitle').value = '';
+  document.getElementById('annBody').value = '';
+  await loadAnnouncementsTab();
+});
+
+// ------------------------- الاجتماعات -------------------------
+
+async function loadMeetingsTab() {
+  const { data, error } = await supabase
+    .from('meetings')
+    .select('id, title, date, minutes')
+    .order('date', { ascending: false });
+
+  const listEl = document.getElementById('meetingsList');
+  if (error) { listEl.innerHTML = `<p class="error">${error.message}</p>`; return; }
+  listEl.innerHTML = (data ?? []).map(m => `
+    <div class="card">
+      <strong>${m.title}</strong>
+      <div class="muted">${m.date ?? ''}</div>
+      ${m.minutes ? `<div class="muted">${m.minutes}</div>` : ''}
+    </div>
+  `).join('') || '<p class="muted">مفيش محاضر اجتماعات لسه</p>';
+}
+
+document.getElementById('meetAddBtn').addEventListener('click', async () => {
+  const title = document.getElementById('meetTitle').value.trim();
+  const date = document.getElementById('meetDate').value || null;
+  const minutes = document.getElementById('meetMinutes').value.trim();
+  if (!title) { alert('اكتب عنوان الاجتماع'); return; }
+  const { error } = await supabase.from('meetings').insert({ school_id: currentSchoolId, title, date, minutes: minutes || null });
+  if (error) { alert(error.message); return; }
+  document.getElementById('meetTitle').value = '';
+  document.getElementById('meetMinutes').value = '';
+  await loadMeetingsTab();
+});
+
+// ------------------------- المالية العامة -------------------------
+
+async function loadFinancesTab() {
+  const { data, error } = await supabase
+    .from('finances')
+    .select('id, date, entry_type, amount, description')
+    .order('date', { ascending: false });
+
+  const listEl = document.getElementById('financesList');
+  if (error) { listEl.innerHTML = `<p class="error">${error.message}</p>`; return; }
+  listEl.innerHTML = (data ?? []).map(f => `
+    <div class="card">
+      <strong>${f.entry_type === 'income' ? 'إيراد' : 'مصروف'}: ${f.amount}</strong>
+      <div class="muted">${f.date} — ${f.description ?? ''}</div>
+    </div>
+  `).join('') || '<p class="muted">مفيش قيود مالية لسه</p>';
+}
+
+document.getElementById('finAddBtn').addEventListener('click', async () => {
+  const date = document.getElementById('finDate').value;
+  const entry_type = document.getElementById('finType').value;
+  const amount = Number(document.getElementById('finAmount').value);
+  const description = document.getElementById('finDesc').value.trim();
+  if (!date || !amount) { alert('اكتب التاريخ والمبلغ'); return; }
+  const { error } = await supabase.from('finances').insert({ school_id: currentSchoolId, date, entry_type, amount, description: description || null });
+  if (error) { alert(error.message); return; }
+  document.getElementById('finAmount').value = '';
+  document.getElementById('finDesc').value = '';
+  await loadFinancesTab();
+});
+
+// ------------------------- ملاحظات الطلاب -------------------------
+
+async function loadNotesTab() {
+  const { data: students } = await supabase.from('students').select('id, full_name');
+  const sel = document.getElementById('noteStudentSelect');
+  sel.innerHTML = (students ?? []).map(s => `<option value="${s.id}">${s.full_name}</option>`).join('');
+  await renderNotesForSelectedStudent();
+}
+
+async function renderNotesForSelectedStudent() {
+  const studentId = document.getElementById('noteStudentSelect').value;
+  const listEl = document.getElementById('notesListForStudent');
+  if (!studentId) { listEl.innerHTML = ''; return; }
+
+  const { data, error } = await supabase
+    .from('student_notes')
+    .select('id, note, created_at')
+    .eq('student_id', studentId)
+    .order('created_at', { ascending: false });
+
+  if (error) { listEl.innerHTML = `<p class="error">${error.message}</p>`; return; }
+  listEl.innerHTML = (data ?? []).map(n => `
+    <div class="card">
+      <div>${n.note}</div>
+      <div class="muted">${new Date(n.created_at).toLocaleDateString('ar-EG')}</div>
+    </div>
+  `).join('') || '<p class="muted">مفيش ملاحظات لسه</p>';
+}
+
+document.getElementById('noteStudentSelect').addEventListener('change', renderNotesForSelectedStudent);
+
+document.getElementById('noteAddBtn').addEventListener('click', async () => {
+  const studentId = document.getElementById('noteStudentSelect').value;
+  const note = document.getElementById('noteText').value.trim();
+  if (!studentId || !note) { alert('اختار طالب واكتب ملاحظة'); return; }
+  const { error } = await supabase.from('student_notes').insert({ school_id: currentSchoolId, student_id: studentId, note });
+  if (error) { alert(error.message); return; }
+  document.getElementById('noteText').value = '';
+  await renderNotesForSelectedStudent();
+});
+
+
 
 // ------------------------- التبويبات -------------------------
 
@@ -645,6 +838,12 @@ document.querySelectorAll('nav.tabs button').forEach(btn => {
     if (btn.dataset.tab === 'deletions') await loadDeletionsTab();
     if (btn.dataset.tab === 'activity') await loadActivityTab();
     if (btn.dataset.tab === 'pricing') await loadPricingTab();
+    if (btn.dataset.tab === 'guardians') await loadGuardiansTab();
+    if (btn.dataset.tab === 'calendar') await loadCalendarTab();
+    if (btn.dataset.tab === 'announcements') await loadAnnouncementsTab();
+    if (btn.dataset.tab === 'meetings') await loadMeetingsTab();
+    if (btn.dataset.tab === 'finances') await loadFinancesTab();
+    if (btn.dataset.tab === 'notes') await loadNotesTab();
   });
 });
 
