@@ -1,4 +1,4 @@
-/* آخر-تحديث: 2026-08-10 18:47:54 */
+/* آخر-تحديث: 2026-08-10 18:56:00 */
 :root {
   --ink: #17232e;
   --ink-soft: #5a6373;
@@ -141,6 +141,31 @@ button:hover { background: var(--primary-l); }
 }
 
 .card-row h2 { flex: 1; }
+
+.category-tabs {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  padding-bottom: 0.3rem;
+}
+
+.category-tabs button {
+  background: var(--paper-2);
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  box-shadow: none;
+}
+
+.category-tabs button.active {
+  background: var(--primary);
+  color: white;
+}
 
 nav.tabs {
   display: flex;
