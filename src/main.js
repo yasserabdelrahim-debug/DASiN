@@ -180,12 +180,10 @@ async function loadStudentsTab() {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <div class="card-row">
-        <strong>${s.full_name}${s.is_member ? ' (عضو)' : ''}</strong>
-      </div>
+      <strong>${s.full_name}${s.is_member ? ' (عضو)' : ''}</strong>
       <div class="muted">المطلوب: ${s.amount_due ?? 0} — المدفوع: <span data-paid-display>${s.amount_paid ?? 0}</span></div>
-      <div class="card-row">
-        <input type="number" data-amount-input value="${s.amount_paid ?? 0}" style="width:100px" />
+      <div class="inline-group">
+        <input type="number" data-amount-input value="${s.amount_paid ?? 0}" />
         <button data-save-payment class="small-btn">حفظ الدفع</button>
       </div>
     `;
@@ -248,14 +246,12 @@ async function renderAttendanceList() {
   listEl.innerHTML = '';
   for (const s of students) {
     const row = document.createElement('div');
-    row.className = 'card card-row';
+    row.className = 'card inline-group';
     row.innerHTML = `
-      <span>${s.full_name}</span>
-      <span>
-        <button data-status="present" class="small-btn">حاضر</button>
-        <button data-status="late" class="small-btn">متأخر</button>
-        <button data-status="absent" class="small-btn">غائب</button>
-      </span>
+      <span style="flex:1">${s.full_name}</span>
+      <button data-status="present" class="small-btn">حاضر</button>
+      <button data-status="late" class="small-btn">متأخر</button>
+      <button data-status="absent" class="small-btn">غائب</button>
     `;
     row.querySelectorAll('[data-status]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -367,7 +363,7 @@ async function loadRegistrationsTab() {
     card.innerHTML = `
       <strong>${reg.student_name}</strong>
       <div class="muted">ولي الأمر: ${reg.guardian_name} — ${reg.guardian_email}${reg.guardian_phone ? ' — ' + reg.guardian_phone : ''}</div>
-      <div class="card-row">
+      <div class="inline-group">
         <button data-approve class="small-btn">قبول</button>
         <button data-reject class="small-btn">رفض</button>
       </div>
