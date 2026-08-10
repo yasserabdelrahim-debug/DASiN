@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- آخر-تحديث: 2026-08-10 18:31:42 -->
+<!-- آخر-تحديث: 2026-08-10 18:56:32 -->
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -32,20 +32,40 @@
         <button id="logoutBtn" class="small-btn" data-i18n="logoutBtn"></button>
       </div>
 
-      <nav class="tabs">
+      <nav class="category-tabs">
+        <button data-category="people" class="active">الأشخاص</button>
+        <button data-category="academic">الأكاديمي</button>
+        <button data-category="finance">المالية</button>
+        <button data-category="comms">التواصل</button>
+        <button data-category="system">النظام</button>
+      </nav>
+
+      <nav class="tabs" data-category-group="people">
         <button data-tab="students" class="active" data-i18n="tabStudents"></button>
         <button data-tab="registrations" data-i18n="tabRegistrations"></button>
-        <button data-tab="attendance" data-i18n="tabAttendance"></button>
-        <button data-tab="homework" data-i18n="tabHomework"></button>
-        <button data-tab="programs" data-i18n="tabPrograms"></button>
-        <button data-tab="pricing">الأسعار</button>
         <button data-tab="guardians">أولياء الأمور</button>
-        <button data-tab="calendar">التقويم</button>
-        <button data-tab="announcements">الإعلانات</button>
-        <button data-tab="meetings">الاجتماعات</button>
-        <button data-tab="finances">المالية العامة</button>
         <button data-tab="notes">ملاحظات الطلاب</button>
-        <button data-tab="deletions" data-i18n="tabDeletions"></button>
+      </nav>
+
+      <nav class="tabs" data-category-group="academic" hidden>
+        <button data-tab="attendance" class="active" data-i18n="tabAttendance"></button>
+        <button data-tab="homework" data-i18n="tabHomework"></button>
+        <button data-tab="calendar">التقويم</button>
+      </nav>
+
+      <nav class="tabs" data-category-group="finance" hidden>
+        <button data-tab="programs" class="active" data-i18n="tabPrograms"></button>
+        <button data-tab="pricing">الأسعار</button>
+        <button data-tab="finances">المالية العامة</button>
+      </nav>
+
+      <nav class="tabs" data-category-group="comms" hidden>
+        <button data-tab="announcements" class="active">الإعلانات</button>
+        <button data-tab="meetings">الاجتماعات</button>
+      </nav>
+
+      <nav class="tabs" data-category-group="system" hidden>
+        <button data-tab="deletions" class="active" data-i18n="tabDeletions"></button>
         <button data-tab="activity" data-i18n="tabActivity"></button>
       </nav>
 
