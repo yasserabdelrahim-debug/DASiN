@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- آخر-تحديث: 2026-08-10 17:46:21 -->
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -34,6 +35,7 @@
         <button data-tab="attendance" data-i18n="tabAttendance"></button>
         <button data-tab="homework" data-i18n="tabHomework"></button>
         <button data-tab="programs" data-i18n="tabPrograms"></button>
+        <button data-tab="pricing">الأسعار</button>
         <button data-tab="deletions" data-i18n="tabDeletions"></button>
         <button data-tab="activity" data-i18n="tabActivity"></button>
       </nav>
@@ -71,6 +73,20 @@
         </select>
         <input id="progPrice" type="number" data-i18n-placeholder="progPricePlaceholder" />
         <button id="progAddBtn" data-i18n="progAddBtn"></button>
+      </div>
+
+      <div id="tabPricing" class="tabPanel" hidden>
+        <h3>إعدادات خصم الإخوة</h3>
+        <label>خصم الطفل التاني (%)</label>
+        <input id="discount2Input" type="number" max="18" />
+        <label>خصم الطفل التالت فما فوق (%)</label>
+        <input id="discount3Input" type="number" max="18" />
+        <button id="saveSettingsBtn">حفظ الإعدادات</button>
+        <p id="settingsMsg" class="muted"></p>
+
+        <h3>فحص العائلات</h3>
+        <button id="checkMismatchBtn" class="small-btn">فحص كل العائلات</button>
+        <div id="mismatchList"></div>
       </div>
 
       <div id="tabDeletions" class="tabPanel" hidden>
