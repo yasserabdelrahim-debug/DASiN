@@ -27,7 +27,7 @@ async function init() {
   setBadge('ok', 'متصل');
 
   if (session) {
-    await showDashboard();
+    await routeAfterLogin();
   } else {
     showLogin();
   }
@@ -36,22 +36,41 @@ async function init() {
 function showLogin() {
   loginView.hidden = false;
   dashboardView.hidden = true;
+  document.getElementById('parentView').hidden = true;
 }
 
-async function showDashboard() {
-  loginView.hidden = true;
-  dashboardView.hidden = false;
-
-  const { data: members, error: memberError } = await supabase
+async function routeAfterLogin() {
+  const { data: members } = await supabase
     .from('school_members')
     .select('school_id, schools(name)')
     .limit(1);
 
-  if (memberError || !members || members.length === 0) {
-    schoolNameEl.textContent = '؟';
-    studentsList.innerHTML = '<p class="error">مقدرش أوصل لبيانات مدرستك — راجع الحساب أو الصلاحيات</p>';
+  if (members && members.length > 0) {
+    await showDashboard(members);
     return;
   }
+
+  const { data: guardianLinks } = await supabase
+    .from('guardian_students')
+    .select('school_id, schools(name)')
+    .limit(1);
+
+  if (guardianLinks && guardianLinks.length > 0) {
+    await showParentView(guardianLinks);
+    return;
+  }
+
+  // لا موظف ولا ولي أمر — حساب مش مربوط بأي مدرسة
+  loginView.hidden = false;
+  dashboardView.hidden = true;
+  document.getElementById('parentView').hidden = true;
+  loginError.textContent = 'الحساب ده مش مربوط بأي مدرسة لسه';
+}
+
+async function showDashboard(members) {
+  loginView.hidden = true;
+  dashboardView.hidden = false;
+  document.getElementById('parentView').hidden = true;
 
   currentSchoolId = members[0].school_id;
   schoolNameEl.textContent = members[0].schools?.name ?? '؟';
@@ -59,6 +78,71 @@ async function showDashboard() {
   await loadClasses();
   await loadStudentsTab();
 }
+
+async function showParentView(guardianLinks) {
+  loginView.hidden = true;
+  dashboardView.hidden = true;
+  const parentView = document.getElementById('parentView');
+  parentView.hidden = false;
+
+  document.getElementById('parentSchoolName').textContent = guardianLinks[0].schools?.name ?? '؟';
+
+  const { data: links, error } = await supabase
+    .from('guardian_students')
+    .select('student_id, students(id, full_name, is_member)');
+
+  const listEl = document.getElementById('childrenList');
+
+  if (error || !links || links.length === 0) {
+    listEl.innerHTML = '<p class="muted">مفيش أبناء مربوطين بحسابك لسه</p>';
+    return;
+  }
+
+  listEl.innerHTML = '';
+  for (const link of links) {
+    const child = link.students;
+    if (!child) continue;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <h3>${child.full_name}${child.is_member ? ' (عضو)' : ''}</h3>
+      <div class="muted">الحضور الأخير</div>
+      <div data-attendance-list></div>
+      <div class="muted">الواجبات</div>
+      <div data-homework-list></div>
+    `;
+    listEl.appendChild(card);
+
+    const { data: attendance } = await supabase
+      .from('attendance')
+      .select('date, status')
+      .eq('student_id', child.id)
+      .order('date', { ascending: false })
+      .limit(5);
+
+    const attEl = card.querySelector('[data-attendance-list]');
+    attEl.innerHTML = attendance && attendance.length > 0
+      ? attendance.map(a => `<div class="muted">${a.date}: ${a.status}</div>`).join('')
+      : '<div class="muted">مفيش سجل حضور لسه</div>';
+
+    const { data: homeworkRows } = await supabase
+      .from('homework')
+      .select('title, due_date')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    const hwEl = card.querySelector('[data-homework-list]');
+    hwEl.innerHTML = homeworkRows && homeworkRows.length > 0
+      ? homeworkRows.map(h => `<div class="muted">${h.title}${h.due_date ? ' — تسليم: ' + h.due_date : ''}</div>`).join('')
+      : '<div class="muted">مفيش واجبات لسه</div>';
+  }
+}
+
+document.getElementById('parentLogoutBtn').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  showLogin();
+});
 
 async function loadClasses() {
   const { data, error } = await supabase.from('classes').select('id, name');
@@ -256,6 +340,225 @@ document.getElementById('hwAddBtn').addEventListener('click', async () => {
   await renderHomeworkList();
 });
 
+// ------------------------- تبويب الطلبات (القبول) -------------------------
+
+async function loadRegistrationsTab() {
+  const listEl = document.getElementById('registrationsList');
+  const { data, error } = await supabase
+    .from('registrations')
+    .select('id, student_name, guardian_name, guardian_email, guardian_phone, program_id, status')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">${error.message}</p>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    listEl.innerHTML = '<p class="muted">مفيش طلبات جديدة</p>';
+    return;
+  }
+
+  listEl.innerHTML = '';
+  for (const reg of data) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <strong>${reg.student_name}</strong>
+      <div class="muted">ولي الأمر: ${reg.guardian_name} — ${reg.guardian_email}${reg.guardian_phone ? ' — ' + reg.guardian_phone : ''}</div>
+      <div class="card-row">
+        <button data-approve class="small-btn">قبول</button>
+        <button data-reject class="small-btn">رفض</button>
+      </div>
+      <p data-msg class="muted"></p>
+    `;
+
+    card.querySelector('[data-approve]').addEventListener('click', async () => {
+      // درس §50 من مدينة: مبنبنيش الطالب بنسخ الطلب كامل (حاجة زي
+      // {...reg})، عشان الـid بتاع الطلب ميدوسش على id الطالب الجديد.
+      // بنبني سطر جديد صريح، كل حقل لوحده.
+      const { error: insertError } = await supabase
+        .from('students')
+        .insert({
+          school_id: currentSchoolId,
+          program_id: reg.program_id,
+          full_name: reg.student_name,
+          is_member: false,
+        });
+
+      if (insertError) {
+        card.querySelector('[data-msg]').textContent = `فشل القبول: ${insertError.message}`;
+        return;
+      }
+
+      const { error: updateError } = await supabase
+        .from('registrations')
+        .update({ status: 'approved' })
+        .eq('id', reg.id);
+
+      if (updateError) {
+        card.querySelector('[data-msg]').textContent = `الطالب اتضاف بس فشل تحديث حالة الطلب: ${updateError.message}`;
+        return;
+      }
+
+      card.remove();
+    });
+
+    card.querySelector('[data-reject]').addEventListener('click', async () => {
+      const { error: rejectError } = await supabase
+        .from('registrations')
+        .update({ status: 'rejected' })
+        .eq('id', reg.id);
+
+      if (rejectError) {
+        card.querySelector('[data-msg]').textContent = `فشل الرفض: ${rejectError.message}`;
+        return;
+      }
+      card.remove();
+    });
+
+    listEl.appendChild(card);
+  }
+}
+
+// ------------------------- تبويب البرامج -------------------------
+
+async function loadProgramsTab() {
+  const listEl = document.getElementById('programsList');
+  const { data, error } = await supabase
+    .from('programs')
+    .select('id, name, pricing_model, monthly_price, yearly_price, sibling_discount_pct');
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">${error.message}</p>`;
+    return;
+  }
+
+  listEl.innerHTML = (data ?? [])
+    .map(p => `
+      <div class="card">
+        <strong>${p.name}</strong>
+        <div class="muted">
+          ${p.pricing_model === 'member' ? 'عضو (شهري): ' + (p.monthly_price ?? 0) + ' كل شهر' : 'غير عضو (سنوي): ' + (p.yearly_price ?? 0) + ' في السنة'}
+          ${p.sibling_discount_pct ? ' — خصم إخوة ' + p.sibling_discount_pct + '%' : ''}
+        </div>
+      </div>
+    `)
+    .join('') || '<p class="muted">مفيش برامج مضافة لسه</p>';
+}
+
+document.getElementById('progAddBtn').addEventListener('click', async () => {
+  const name = document.getElementById('progName').value.trim();
+  const model = document.getElementById('progModel').value;
+  const price = Number(document.getElementById('progPrice').value);
+
+  if (!name || !price) {
+    alert('اكتب اسم البرنامج والسعر');
+    return;
+  }
+
+  const payload = {
+    school_id: currentSchoolId,
+    name,
+    pricing_model: model,
+    monthly_price: model === 'member' ? price : null,
+    yearly_price: model === 'non_member' ? price : null,
+  };
+
+  const { error } = await supabase.from('programs').insert(payload);
+
+  if (error) {
+    alert(`فشلت الإضافة: ${error.message}`);
+    return;
+  }
+
+  document.getElementById('progName').value = '';
+  document.getElementById('progPrice').value = '';
+  await loadProgramsTab();
+});
+
+// ------------------------- تبويب سجل الحذف -------------------------
+
+async function loadDeletionsTab() {
+  const listEl = document.getElementById('deletionsList');
+  const { data, error } = await supabase
+    .from('deletion_log')
+    .select('id, table_name, record_data, deleted_at')
+    .order('deleted_at', { ascending: false })
+    .limit(20);
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">${error.message}</p>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    listEl.innerHTML = '<p class="muted">مفيش حذف حصل لسه</p>';
+    return;
+  }
+
+  const tableLabels = {
+    students: 'طالب',
+    teachers: 'معلم',
+    homework: 'واجب',
+    registrations: 'طلب تسجيل',
+  };
+
+  listEl.innerHTML = data
+    .map(d => {
+      const name = d.record_data?.full_name || d.record_data?.title || d.record_data?.student_name || '(بلا اسم)';
+      return `
+        <div class="card">
+          <strong>${tableLabels[d.table_name] ?? d.table_name}: ${name}</strong>
+          <div class="muted">اتمسح في: ${new Date(d.deleted_at).toLocaleString('ar-EG')}</div>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+// ------------------------- تبويب النشاط -------------------------
+
+async function loadActivityTab() {
+  const listEl = document.getElementById('activityList');
+
+  const { data: staff, error: staffError } = await supabase
+    .from('school_members')
+    .select('last_login_at, roles(name)');
+
+  const { data: guardians, error: guardianError } = await supabase
+    .from('guardian_students')
+    .select('last_login_at, students(full_name)');
+
+  if (staffError || guardianError) {
+    listEl.innerHTML = `<p class="error">${(staffError || guardianError).message}</p>`;
+    return;
+  }
+
+  let html = '<h3>الموظفين</h3>';
+  html += (staff ?? [])
+    .map(s => `
+      <div class="card">
+        <strong>${s.roles?.name ?? '؟'}</strong>
+        <div class="muted">آخر دخول: ${s.last_login_at ? new Date(s.last_login_at).toLocaleString('ar-EG') : 'مادخلش لسه'}</div>
+      </div>
+    `)
+    .join('') || '<p class="muted">مفيش موظفين</p>';
+
+  html += '<h3>أولياء الأمور</h3>';
+  html += (guardians ?? [])
+    .map(g => `
+      <div class="card">
+        <strong>ولي أمر ${g.students?.full_name ?? '؟'}</strong>
+        <div class="muted">آخر دخول: ${g.last_login_at ? new Date(g.last_login_at).toLocaleString('ar-EG') : 'مادخلش لسه'}</div>
+      </div>
+    `)
+    .join('') || '<p class="muted">مفيش أولياء أمور مربوطين</p>';
+
+  listEl.innerHTML = html;
+}
+
 // ------------------------- التبويبات -------------------------
 
 document.querySelectorAll('nav.tabs button').forEach(btn => {
@@ -270,8 +573,12 @@ document.querySelectorAll('nav.tabs button').forEach(btn => {
     panel.hidden = false;
 
     if (btn.dataset.tab === 'students') await loadStudentsTab();
+    if (btn.dataset.tab === 'registrations') await loadRegistrationsTab();
     if (btn.dataset.tab === 'attendance') await loadAttendanceTab();
     if (btn.dataset.tab === 'homework') await loadHomeworkTab();
+    if (btn.dataset.tab === 'programs') await loadProgramsTab();
+    if (btn.dataset.tab === 'deletions') await loadDeletionsTab();
+    if (btn.dataset.tab === 'activity') await loadActivityTab();
   });
 });
 
@@ -289,7 +596,8 @@ loginBtn.addEventListener('click', async () => {
     return;
   }
 
-  await showDashboard();
+  await supabase.rpc('update_my_last_login');
+  await routeAfterLogin();
 });
 
 logoutBtn.addEventListener('click', async () => {

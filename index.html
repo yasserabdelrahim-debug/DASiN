@@ -29,12 +29,20 @@
 
       <nav class="tabs">
         <button data-tab="students" class="active">الطلاب</button>
+        <button data-tab="registrations">الطلبات</button>
         <button data-tab="attendance">الحضور</button>
         <button data-tab="homework">الواجبات</button>
+        <button data-tab="programs">البرامج</button>
+        <button data-tab="deletions">سجل الحذف</button>
+        <button data-tab="activity">النشاط</button>
       </nav>
 
       <div id="tabStudents" class="tabPanel">
         <div id="studentsList"></div>
+      </div>
+
+      <div id="tabRegistrations" class="tabPanel" hidden>
+        <div id="registrationsList"></div>
       </div>
 
       <div id="tabAttendance" class="tabPanel" hidden>
@@ -51,6 +59,34 @@
         <button id="hwAddBtn">إضافة واجب</button>
         <div id="homeworkList"></div>
       </div>
+
+      <div id="tabPrograms" class="tabPanel" hidden>
+        <div id="programsList"></div>
+        <h3>إضافة برنامج جديد</h3>
+        <input id="progName" type="text" placeholder="اسم البرنامج" />
+        <select id="progModel">
+          <option value="member">عضو (شهري)</option>
+          <option value="non_member">غير عضو (سنوي)</option>
+        </select>
+        <input id="progPrice" type="number" placeholder="السعر" />
+        <button id="progAddBtn">إضافة</button>
+      </div>
+
+      <div id="tabDeletions" class="tabPanel" hidden>
+        <div id="deletionsList"></div>
+      </div>
+
+      <div id="tabActivity" class="tabPanel" hidden>
+        <div id="activityList"></div>
+      </div>
+    </section>
+
+    <section id="parentView" hidden>
+      <div class="card-row">
+        <h2>بوابة أولياء الأمور — <span id="parentSchoolName"></span></h2>
+        <button id="parentLogoutBtn" class="small-btn">خروج</button>
+      </div>
+      <div id="childrenList"></div>
     </section>
   </div>
 
