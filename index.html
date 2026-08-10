@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- آخر-تحديث: 2026-08-10 17:46:21 -->
+<!-- آخر-تحديث: 2026-08-10 18:26:17 -->
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -36,6 +36,12 @@
         <button data-tab="homework" data-i18n="tabHomework"></button>
         <button data-tab="programs" data-i18n="tabPrograms"></button>
         <button data-tab="pricing">الأسعار</button>
+        <button data-tab="guardians">أولياء الأمور</button>
+        <button data-tab="calendar">التقويم</button>
+        <button data-tab="announcements">الإعلانات</button>
+        <button data-tab="meetings">الاجتماعات</button>
+        <button data-tab="finances">المالية العامة</button>
+        <button data-tab="notes">ملاحظات الطلاب</button>
         <button data-tab="deletions" data-i18n="tabDeletions"></button>
         <button data-tab="activity" data-i18n="tabActivity"></button>
       </nav>
@@ -87,6 +93,61 @@
         <h3>فحص العائلات</h3>
         <button id="checkMismatchBtn" class="small-btn">فحص كل العائلات</button>
         <div id="mismatchList"></div>
+      </div>
+
+      <div id="tabGuardians" class="tabPanel" hidden>
+        <div id="guardiansList"></div>
+        <h3>إضافة ولي أمر</h3>
+        <input id="gName" type="text" placeholder="الاسم الكامل" />
+        <input id="gPhone" type="tel" placeholder="التليفون" />
+        <input id="gEmail" type="email" placeholder="الإيميل" />
+        <button id="gAddBtn">إضافة</button>
+      </div>
+
+      <div id="tabCalendar" class="tabPanel" hidden>
+        <div id="calendarList"></div>
+        <h3>إضافة حدث</h3>
+        <input id="calDesc" type="text" placeholder="وصف الحدث" />
+        <input id="calFrom" type="date" />
+        <input id="calTo" type="date" />
+        <button id="calAddBtn">إضافة</button>
+      </div>
+
+      <div id="tabAnnouncements" class="tabPanel" hidden>
+        <div id="announcementsList"></div>
+        <h3>إعلان جديد</h3>
+        <input id="annTitle" type="text" placeholder="العنوان" />
+        <textarea id="annBody" placeholder="النص" style="min-height:80px"></textarea>
+        <button id="annAddBtn">نشر الإعلان</button>
+      </div>
+
+      <div id="tabMeetings" class="tabPanel" hidden>
+        <div id="meetingsList"></div>
+        <h3>محضر اجتماع جديد</h3>
+        <input id="meetTitle" type="text" placeholder="عنوان الاجتماع" />
+        <input id="meetDate" type="date" />
+        <textarea id="meetMinutes" placeholder="المحضر" style="min-height:80px"></textarea>
+        <button id="meetAddBtn">حفظ</button>
+      </div>
+
+      <div id="tabFinances" class="tabPanel" hidden>
+        <div id="financesList"></div>
+        <h3>قيد مالي جديد</h3>
+        <input id="finDate" type="date" />
+        <select id="finType">
+          <option value="expense">مصروف</option>
+          <option value="income">إيراد</option>
+        </select>
+        <input id="finAmount" type="number" placeholder="المبلغ" />
+        <input id="finDesc" type="text" placeholder="الوصف" />
+        <button id="finAddBtn">حفظ</button>
+      </div>
+
+      <div id="tabNotes" class="tabPanel" hidden>
+        <select id="noteStudentSelect"></select>
+        <textarea id="noteText" placeholder="الملاحظة" style="min-height:60px"></textarea>
+        <button id="noteAddBtn">إضافة ملاحظة</button>
+        <div id="notesListForStudent"></div>
       </div>
 
       <div id="tabDeletions" class="tabPanel" hidden>
