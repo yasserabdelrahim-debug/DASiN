@@ -1,4 +1,4 @@
-/* آخر-تحديث: 2026-08-10 18:57:14 */
+/* آخر-تحديث: 2026-08-10 19:08:41 */
 import { supabase } from './supabaseClient.js';
 import { applyStaticTranslations, toggleLang, t } from './i18n.js';
 import { recomputeFamily, findMismatchedStudents } from './pricing.js';
@@ -829,7 +829,14 @@ document.querySelectorAll('.category-tabs button').forEach(catBtn => {
     });
 
     const activeGroup = document.querySelector(`nav.tabs[data-category-group="${catBtn.dataset.category}"]`);
-    activeGroup.querySelector('button').click();
+    const firstTabBtn = activeGroup.querySelector('button');
+    if (firstTabBtn) {
+      firstTabBtn.click();
+    } else {
+      // قسم لسه مفيهوش شاشات مبنية (زي "الموظفين" دلوقتي) — نخفي كل
+      // اللوحات، بدل ما نسيب آخر تبويب من قسم تاني ظاهر بالغلط
+      document.querySelectorAll('.tabPanel').forEach(p => (p.hidden = true));
+    }
   });
 });
 
