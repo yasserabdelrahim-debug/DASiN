@@ -1,4 +1,8 @@
 import { supabase } from './supabaseClient.js';
+import { applyStaticTranslations, toggleLang } from './i18n.js';
+
+applyStaticTranslations();
+document.getElementById('langToggleBtn').addEventListener('click', toggleLang);
 
 // صفحة التسجيل بتحدد المدرسة عن طريق ?school=dasin في الرابط.
 // لو مفيش، بترجع لـdasin كافتراضي.

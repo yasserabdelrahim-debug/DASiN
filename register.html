@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>استمارة التسجيل — DASiN</title>
+  <title>DASiN</title>
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
   <div id="app">
     <header>
-      <h1>استمارة التسجيل</h1>
+      <button id="langToggleBtn" data-i18n-toggle class="small-btn lang-btn"></button>
+      <h1 style="margin-inline-start:auto" data-i18n="registerTitle"></h1>
     </header>
 
     <section id="registerForm">
-      <input id="regStudentName" type="text" placeholder="اسم الطالب" />
-      <input id="regGuardianName" type="text" placeholder="اسم ولي الأمر" />
-      <input id="regGuardianEmail" type="email" placeholder="إيميل ولي الأمر" />
-      <input id="regGuardianPhone" type="tel" placeholder="تليفون ولي الأمر (اختياري)" />
-      <button id="submitRegBtn">إرسال الطلب</button>
+      <input id="regStudentName" type="text" data-i18n-placeholder="regStudentNamePlaceholder" />
+      <input id="regGuardianName" type="text" data-i18n-placeholder="regGuardianNamePlaceholder" />
+      <input id="regGuardianEmail" type="email" data-i18n-placeholder="regGuardianEmailPlaceholder" />
+      <input id="regGuardianPhone" type="tel" data-i18n-placeholder="regGuardianPhonePlaceholder" />
+      <button id="submitRegBtn" data-i18n="submitRegBtn"></button>
       <p id="regMessage"></p>
     </section>
   </div>

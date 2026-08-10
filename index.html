@@ -9,32 +9,33 @@
 <body>
   <div id="app">
     <header>
-      <h1>DASiN</h1>
-      <div id="statusBadge" class="badge badge-loading">جاري الاتصال...</div>
+      <button id="langToggleBtn" data-i18n-toggle class="small-btn lang-btn"></button>
+      <div id="statusBadge" class="badge badge-loading" data-i18n="statusConnecting"></div>
+      <h1 style="margin-inline-start:auto">DASiN</h1>
     </header>
 
     <section id="loginView">
-      <h2>تسجيل الدخول</h2>
-      <input id="email" type="email" placeholder="الإيميل" />
-      <input id="password" type="password" placeholder="الباسورد" />
-      <button id="loginBtn">دخول</button>
+      <h2 data-i18n="loginTitle"></h2>
+      <input id="email" type="email" data-i18n-placeholder="emailPlaceholder" />
+      <input id="password" type="password" data-i18n-placeholder="passwordPlaceholder" />
+      <button id="loginBtn" data-i18n="loginBtn"></button>
       <p id="loginError" class="error"></p>
     </section>
 
     <section id="dashboardView" hidden>
       <div class="card-row">
-        <h2>لوحة <span id="schoolName"></span></h2>
-        <button id="logoutBtn" class="small-btn">خروج</button>
+        <h2><span data-i18n="dashboardPrefix"></span> <span id="schoolName"></span></h2>
+        <button id="logoutBtn" class="small-btn" data-i18n="logoutBtn"></button>
       </div>
 
       <nav class="tabs">
-        <button data-tab="students" class="active">الطلاب</button>
-        <button data-tab="registrations">الطلبات</button>
-        <button data-tab="attendance">الحضور</button>
-        <button data-tab="homework">الواجبات</button>
-        <button data-tab="programs">البرامج</button>
-        <button data-tab="deletions">سجل الحذف</button>
-        <button data-tab="activity">النشاط</button>
+        <button data-tab="students" class="active" data-i18n="tabStudents"></button>
+        <button data-tab="registrations" data-i18n="tabRegistrations"></button>
+        <button data-tab="attendance" data-i18n="tabAttendance"></button>
+        <button data-tab="homework" data-i18n="tabHomework"></button>
+        <button data-tab="programs" data-i18n="tabPrograms"></button>
+        <button data-tab="deletions" data-i18n="tabDeletions"></button>
+        <button data-tab="activity" data-i18n="tabActivity"></button>
       </nav>
 
       <div id="tabStudents" class="tabPanel">
@@ -54,22 +55,22 @@
 
       <div id="tabHomework" class="tabPanel" hidden>
         <select id="hwClassSelect"></select>
-        <input id="hwTitle" type="text" placeholder="عنوان الواجب" />
+        <input id="hwTitle" type="text" data-i18n-placeholder="hwTitlePlaceholder" />
         <input id="hwDueDate" type="date" />
-        <button id="hwAddBtn">إضافة واجب</button>
+        <button id="hwAddBtn" data-i18n="hwAddBtn"></button>
         <div id="homeworkList"></div>
       </div>
 
       <div id="tabPrograms" class="tabPanel" hidden>
         <div id="programsList"></div>
-        <h3>إضافة برنامج جديد</h3>
-        <input id="progName" type="text" placeholder="اسم البرنامج" />
+        <h3 data-i18n="addProgramHeading"></h3>
+        <input id="progName" type="text" data-i18n-placeholder="progNamePlaceholder" />
         <select id="progModel">
-          <option value="member">عضو (شهري)</option>
-          <option value="non_member">غير عضو (سنوي)</option>
+          <option value="member" data-i18n="progModelMember"></option>
+          <option value="non_member" data-i18n="progModelNonMember"></option>
         </select>
-        <input id="progPrice" type="number" placeholder="السعر" />
-        <button id="progAddBtn">إضافة</button>
+        <input id="progPrice" type="number" data-i18n-placeholder="progPricePlaceholder" />
+        <button id="progAddBtn" data-i18n="progAddBtn"></button>
       </div>
 
       <div id="tabDeletions" class="tabPanel" hidden>
@@ -83,8 +84,8 @@
 
     <section id="parentView" hidden>
       <div class="card-row">
-        <h2>بوابة أولياء الأمور — <span id="parentSchoolName"></span></h2>
-        <button id="parentLogoutBtn" class="small-btn">خروج</button>
+        <h2><span data-i18n="parentPortalPrefix"></span> <span id="parentSchoolName"></span></h2>
+        <button id="parentLogoutBtn" class="small-btn" data-i18n="logoutBtn"></button>
       </div>
       <div id="childrenList"></div>
     </section>

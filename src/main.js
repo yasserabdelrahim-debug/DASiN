@@ -1,4 +1,12 @@
 import { supabase } from './supabaseClient.js';
+import { applyStaticTranslations, toggleLang, t } from './i18n.js';
+
+applyStaticTranslations();
+document.getElementById('langToggleBtn').addEventListener('click', () => {
+  toggleLang();
+  // إعادة رسم أي نص ديناميكي معروض حاليًا (زي حالة الاتصال) باللغة الجديدة
+  setBadge(statusBadge.classList.contains('badge-ok') ? 'ok' : 'error', null);
+});
 
 const statusBadge = document.getElementById('statusBadge');
 const loginView = document.getElementById('loginView');
@@ -14,17 +22,17 @@ let currentClasses = [];
 
 function setBadge(state, text) {
   statusBadge.className = `badge badge-${state}`;
-  statusBadge.textContent = text;
+  statusBadge.textContent = text ?? t(state === 'ok' ? 'statusConnected' : state === 'error' ? 'statusError' : 'statusConnecting');
 }
 
 let connectionTimeout = setTimeout(() => {
-  setBadge('error', 'مفيش رد من القاعدة — تأكد من إعدادات .env');
+  setBadge('error');
 }, 8000);
 
 async function init() {
   const { data: { session } } = await supabase.auth.getSession();
   clearTimeout(connectionTimeout);
-  setBadge('ok', 'متصل');
+  setBadge('ok');
 
   if (session) {
     await routeAfterLogin();
@@ -64,7 +72,7 @@ async function routeAfterLogin() {
   loginView.hidden = false;
   dashboardView.hidden = true;
   document.getElementById('parentView').hidden = true;
-  loginError.textContent = 'الحساب ده مش مربوط بأي مدرسة لسه';
+  loginError.textContent = t('noAccountLinked');
 }
 
 async function showDashboard(members) {
