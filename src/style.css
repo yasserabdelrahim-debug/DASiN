@@ -1,0 +1,121 @@
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  background: #f5f7fb;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.badge-loading { background: #fde68a; color: #78350f; }
+.badge-ok      { background: #bbf7d0; color: #14532d; }
+.badge-error   { background: #fecaca; color: #7f1d1d; }
+
+input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 16px; /* درس من مدينة: أقل من كده بيعمل zoom تلقائي في iOS Safari */
+  padding: 0.6rem;
+  margin-bottom: 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+button {
+  font-size: 16px;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: white;
+  cursor: pointer;
+}
+
+.error {
+  color: #b91c1c;
+  min-height: 1.2em;
+}
+
+.success {
+  color: #15803d;
+}
+
+nav.tabs {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+nav.tabs button {
+  background: #e5e7eb;
+  color: #111827;
+  font-size: 14px;
+  padding: 0.4rem 0.8rem;
+}
+
+nav.tabs button.active {
+  background: #4f46e5;
+  color: white;
+}
+
+.card {
+  background: white;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+select {
+  font-size: 16px;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 0.6rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.small-btn {
+  font-size: 13px;
+  padding: 0.3rem 0.6rem;
+}
+
+.muted {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+#studentsList {
+  list-style: none;
+  padding: 0;
+}
+
+#studentsList li {
+  background: white;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.4rem;
+}

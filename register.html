@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>استمارة التسجيل — DASiN</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>استمارة التسجيل</h1>
+    </header>
+
+    <section id="registerForm">
+      <input id="regStudentName" type="text" placeholder="اسم الطالب" />
+      <input id="regGuardianName" type="text" placeholder="اسم ولي الأمر" />
+      <input id="regGuardianEmail" type="email" placeholder="إيميل ولي الأمر" />
+      <input id="regGuardianPhone" type="tel" placeholder="تليفون ولي الأمر (اختياري)" />
+      <button id="submitRegBtn">إرسال الطلب</button>
+      <p id="regMessage"></p>
+    </section>
+  </div>
+
+  <script type="module" src="/src/register.js"></script>
+</body>
+</html>
