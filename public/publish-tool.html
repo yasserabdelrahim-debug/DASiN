@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>أداة النشر — DASiN</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    max-width: 640px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    background: #f3f2ee;
+    color: #1c2233;
+  }
+  h1 { font-size: 1.3rem; }
+  label { display: block; margin: 1rem 0 0.3rem; font-weight: 600; font-size: 0.9rem; }
+  input, textarea, select {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 15px;
+    padding: 0.6rem;
+    border: 1px solid #d8d6cd;
+    border-radius: 8px;
+    font-family: inherit;
+  }
+  textarea { font-family: monospace; min-height: 320px; direction: ltr; text-align: left; }
+  button {
+    margin-top: 1rem;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    background: #2d5c4d;
+    color: white;
+    cursor: pointer;
+  }
+  .status { margin-top: 1rem; padding: 0.8rem; border-radius: 8px; font-size: 0.9rem; }
+  .status-ok { background: #e2efe6; color: #2d6a4f; }
+  .status-error { background: #f6e4e0; color: #b64536; }
+  .status-loading { background: #f3e3c4; color: #7a5a1e; }
+  .quick-files { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
+  .quick-files button {
+    margin: 0; font-size: 12px; padding: 0.3rem 0.6rem;
+    background: #e4ede9; color: #1c2233;
+  }
+  .hint { color: #5b6478; font-size: 0.8rem; margin-top: 0.2rem; }
+</style>
+</head>
+<body>
+  <h1>🚀 أداة نشر DASiN</h1>
+  <p class="hint">بتنشر ملف واحد مباشرة على GitHub، بيشغّل النشر الأوتوماتيكي تلقائي. متطلوبش git ولا PowerShell.</p>
+
+  <label>GitHub Personal Access Token (بيتحفظ في المتصفح بتاعك بس)</label>
+  <input id="pat" type="password" placeholder="ghp_..." />
+  <p class="hint">من GitHub → Settings → Developer settings → Personal access tokens → صلاحية "repo" كفاية.</p>
+
+  <label>المالك/الريبو</label>
+  <input id="repoFull" value="yasserabdelrahim-debug/DASiN" />
+
+  <label>مسار الملف</label>
+  <input id="filePath" placeholder="مثال: src/main.js" />
+  <div class="quick-files">
+    <button data-path="index.html">index.html</button>
+    <button data-path="register.html">register.html</button>
+    <button data-path="src/main.js">src/main.js</button>
+    <button data-path="src/register.js">src/register.js</button>
+    <button data-path="src/style.css">src/style.css</button>
+    <button data-path="src/i18n.js">src/i18n.js</button>
+    <button data-path="src/supabaseClient.js">src/supabaseClient.js</button>
+    <button data-path="vite.config.js">vite.config.js</button>
+  </div>
+
+  <label>محتوى الملف</label>
+  <textarea id="fileContent" placeholder="الصق محتوى الملف كامل هنا..."></textarea>
+
+  <label>رسالة الكوميت (اختياري)</label>
+  <input id="commitMsg" placeholder="تحديث من أداة النشر" />
+
+  <button id="publishBtn">نشر الملف</button>
+  <div id="status"></div>
+
+  <script>
+    const patEl = document.getElementById('pat');
+    const repoEl = document.getElementById('repoFull');
+    const pathEl = document.getElementById('filePath');
+    const contentEl = document.getElementById('fileContent');
+    const msgEl = document.getElementById('commitMsg');
+    const statusEl = document.getElementById('status');
+
+    // استرجاع القيم المحفوظة سابقًا
+    patEl.value = localStorage.getItem('dasin_pat') || '';
+    repoEl.value = localStorage.getItem('dasin_repo') || repoEl.value;
+
+    document.querySelectorAll('.quick-files button').forEach(btn => {
+      btn.addEventListener('click', () => { pathEl.value = btn.dataset.path; });
+    });
+
+    function utf8ToBase64(str) {
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+
+    function setStatus(type, text) {
+      statusEl.className = `status status-${type}`;
+      statusEl.textContent = text;
+    }
+
+    document.getElementById('publishBtn').addEventListener('click', async () => {
+      const pat = patEl.value.trim();
+      const [owner, repo] = repoEl.value.trim().split('/');
+      const path = pathEl.value.trim();
+      const content = contentEl.value;
+      const message = msgEl.value.trim() || 'تحديث من أداة النشر';
+
+      if (!pat || !owner || !repo || !path || !content) {
+        setStatus('error', '⚠️ لازم تملأ: التوكن، الريبو، المسار، والمحتوى');
+        return;
+      }
+
+      localStorage.setItem('dasin_pat', pat);
+      localStorage.setItem('dasin_repo', repoEl.value.trim());
+
+      setStatus('loading', 'جاري النشر...');
+
+      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+      const headers = {
+        Authorization: `Bearer ${pat}`,
+        Accept: 'application/vnd.github+json',
+      };
+
+      try {
+        // الخطوة 1: نجيب sha الملف الحالي لو موجود (مطلوب لأي تحديث)
+        let sha = undefined;
+        const getRes = await fetch(apiUrl, { headers });
+        if (getRes.status === 200) {
+          const getData = await getRes.json();
+          sha = getData.sha;
+        } else if (getRes.status !== 404) {
+          const errData = await getRes.json().catch(() => ({}));
+          setStatus('error', `❌ فشل قراءة الملف الحالي (${getRes.status}): ${errData.message || 'خطأ غير معروف'}`);
+          return;
+        }
+
+        // الخطوة 2: ننشر (إنشاء أو تحديث)
+        const putRes = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message,
+            content: utf8ToBase64(content),
+            sha,
+            branch: 'main',
+          }),
+        });
+
+        if (putRes.status === 200 || putRes.status === 201) {
+          setStatus('ok', `✅ اتنشر بنجاح! هيبدأ الموقع يتحدّث تلقائي خلال دقيقة.`);
+        } else {
+          const errData = await putRes.json().catch(() => ({}));
+          setStatus('error', `❌ فشل النشر (${putRes.status}): ${errData.message || 'خطأ غير معروف'}`);
+        }
+      } catch (err) {
+        setStatus('error', `❌ خطأ في الاتصال: ${err.message}`);
+      }
+    });
+  </script>
+</body>
+</html>
