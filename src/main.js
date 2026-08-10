@@ -1,4 +1,4 @@
-/* آخر-تحديث: 2026-08-10 18:26:58 */
+/* آخر-تحديث: 2026-08-10 18:57:14 */
 import { supabase } from './supabaseClient.js';
 import { applyStaticTranslations, toggleLang, t } from './i18n.js';
 import { recomputeFamily, findMismatchedStudents } from './pricing.js';
@@ -818,6 +818,20 @@ document.getElementById('noteAddBtn').addEventListener('click', async () => {
 
 
 // ------------------------- التبويبات -------------------------
+
+document.querySelectorAll('.category-tabs button').forEach(catBtn => {
+  catBtn.addEventListener('click', () => {
+    document.querySelectorAll('.category-tabs button').forEach(b => b.classList.remove('active'));
+    catBtn.classList.add('active');
+
+    document.querySelectorAll('nav.tabs[data-category-group]').forEach(group => {
+      group.hidden = group.dataset.categoryGroup !== catBtn.dataset.category;
+    });
+
+    const activeGroup = document.querySelector(`nav.tabs[data-category-group="${catBtn.dataset.category}"]`);
+    activeGroup.querySelector('button').click();
+  });
+});
 
 document.querySelectorAll('nav.tabs button').forEach(btn => {
   btn.addEventListener('click', async () => {
