@@ -1,231 +1,32 @@
-<!-- آخر-تحديث: 2026-08-10 18:33:12 -->
-:root {
-  --ink: #17232e;
-  --ink-soft: #5a6373;
-  --paper: #EEF0FB;
-  --paper-2: #E4E7F7;
-  --card: #ffffff;
-  --line: rgba(40, 40, 90, 0.12);
-  --primary: #2F6CA0;
-  --primary-l: #4A8FCB;
-  --primary-soft: #DCEFFB;
-  --gold: #b7924a;
-  --gold-l: #d9bd7c;
-  --danger: #a83c3c;
-  --danger-soft: #fbe6e3;
-  --success: #2d6a4f;
-  --success-soft: #e2efe6;
-  --warn: #FDF3C7;
-  --warn-ink: #8A6D1D;
-  --shadow: 0 10px 26px rgba(40, 40, 90, 0.08);
-  --radius: 10px;
-}
+<!doctype html>
+<!-- آخر-تحديث: 2026-08-10 18:33:54 -->
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DASiN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div class="corner-deco"></div>
+  <div id="app">
+    <header>
+      <button id="langToggleBtn" data-i18n-toggle class="small-btn lang-btn"></button>
+      <h1 style="margin-inline-start:auto" data-i18n="registerTitle"></h1>
+    </header>
 
-* { box-sizing: border-box; }
+    <section id="registerForm">
+      <input id="regStudentName" type="text" data-i18n-placeholder="regStudentNamePlaceholder" />
+      <input id="regGuardianName" type="text" data-i18n-placeholder="regGuardianNamePlaceholder" />
+      <input id="regGuardianEmail" type="email" data-i18n-placeholder="regGuardianEmailPlaceholder" />
+      <input id="regGuardianPhone" type="tel" data-i18n-placeholder="regGuardianPhonePlaceholder" />
+      <button id="submitRegBtn" data-i18n="submitRegBtn"></button>
+      <p id="regMessage"></p>
+    </section>
+  </div>
 
-body {
-  font-family: 'Jost', 'Segoe UI', system-ui, sans-serif;
-  max-width: 560px;
-  margin: 0 auto;
-  padding: 1.75rem 1.25rem 4rem;
-  background: var(--paper);
-  color: var(--ink);
-  line-height: 1.55;
-  position: relative;
-}
-
-/* زخرفة زاوية خفيفة — نفس روح مدينة، بس مش ظاهرة على الموبايل عشان
-   الشاشة الصغيرة محتاجة كل مساحتها للمحتوى */
-.corner-deco {
-  position: fixed;
-  bottom: -8%;
-  width: 34vw;
-  max-width: 380px;
-  height: 60vh;
-  max-height: 460px;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.5;
-  background: linear-gradient(135deg, #C9BFF0 0%, #A38FE0 100%);
-  clip-path: polygon(100% 0, 0 100%, 100% 100%);
-  right: -8%;
-}
-
-@media (max-width: 640px) {
-  .corner-deco { display: none; }
-}
-
-h1, h2, h3 {
-  margin: 0;
-  color: var(--ink);
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 700;
-}
-
-h1 { font-size: 1.7rem; letter-spacing: 0.01em; }
-h2 { font-size: 1.3rem; }
-h3 { font-size: 1.05rem; margin: 1.2rem 0 0.6rem; color: var(--primary); }
-
-header {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 1.75rem;
-  padding-bottom: 1.1rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  font-family: 'Jost', sans-serif;
-}
-
-.badge-loading { background: var(--warn); color: var(--warn-ink); }
-.badge-ok      { background: var(--success-soft); color: var(--success); }
-.badge-error   { background: var(--danger-soft); color: var(--danger); }
-
-input, select, textarea {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  font-family: 'Jost', sans-serif;
-  font-size: 16px; /* درس من مدينة: أقل من كده بيعمل zoom تلقائي في iOS Safari */
-  padding: 0.65rem 0.8rem;
-  margin-bottom: 0.65rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--card);
-  color: var(--ink);
-}
-
-input:focus, select:focus, textarea:focus {
-  outline: 2px solid var(--primary-l);
-  outline-offset: 1px;
-  border-color: var(--primary-l);
-}
-
-button {
-  font-family: 'Jost', sans-serif;
-  font-size: 14.5px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: var(--radius);
-  background: var(--primary);
-  color: white;
-  cursor: pointer;
-}
-
-button:hover { background: var(--primary-l); }
-
-.error {
-  color: var(--danger);
-  font-size: 0.9rem;
-  min-height: 1.2em;
-}
-
-.success {
-  color: var(--success);
-  font-size: 0.9rem;
-}
-
-.card-row {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 1.25rem;
-}
-
-.card-row h2 { flex: 1; }
-
-nav.tabs {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.4rem;
-  padding-bottom: 1.1rem;
-  border-bottom: 1px solid var(--line);
-}
-
-nav.tabs button {
-  background: var(--card);
-  color: var(--ink-soft);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 0.4rem 0.8rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  box-shadow: none;
-}
-
-nav.tabs button.active {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  padding: 1.1rem 1.2rem;
-  border-radius: var(--radius);
-  margin-bottom: 0.75rem;
-  box-shadow: var(--shadow);
-}
-
-.card strong {
-  display: block;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.15rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-
-.card .muted {
-  margin-bottom: 0.15rem;
-}
-
-.inline-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.6rem;
-}
-
-.inline-group input {
-  margin-bottom: 0;
-  width: 110px;
-  flex: 0 0 auto;
-}
-
-.inline-group button {
-  flex: 0 0 auto;
-}
-
-.small-btn {
-  font-size: 12.5px;
-  padding: 0.4rem 0.75rem;
-}
-
-.muted {
-  color: var(--ink-soft);
-  font-size: 0.87rem;
-}
-
-.lang-btn {
-  background: var(--card);
-  color: var(--ink-soft);
-  border: 1px solid var(--line);
-}
-
-#studentsList, #registrationsList, #deletionsList, #activityList,
-#programsList, #homeworkList, #childrenList, #attStudentsList,
-#guardiansList, #calendarList, #announcementsList, #meetingsList,
-#financesList, #notesListForStudent, #mismatchList {
-  display: flex;
-  flex-direction: column;
-}
+  <script type="module" src="/src/register.js"></script>
+</body>
+</html>
