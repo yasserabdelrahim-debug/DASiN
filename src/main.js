@@ -1,5 +1,7 @@
+/* آخر-تحديث: 2026-08-10 17:47:28 */
 import { supabase } from './supabaseClient.js';
 import { applyStaticTranslations, toggleLang, t } from './i18n.js';
+import { recomputeFamily, findMismatchedStudents } from './pricing.js';
 
 applyStaticTranslations();
 document.getElementById('langToggleBtn').addEventListener('click', () => {
@@ -563,6 +565,65 @@ async function loadActivityTab() {
   listEl.innerHTML = html;
 }
 
+// ------------------------- تبويب الأسعار -------------------------
+
+async function loadPricingTab() {
+  const { data: rows } = await supabase
+    .from('pricing_settings')
+    .select('sibling_discount_2_pct, sibling_discount_3_pct')
+    .eq('school_id', currentSchoolId)
+    .limit(1);
+
+  const settings = rows?.[0];
+  document.getElementById('discount2Input').value = settings?.sibling_discount_2_pct ?? 0;
+  document.getElementById('discount3Input').value = settings?.sibling_discount_3_pct ?? 0;
+  document.getElementById('mismatchList').innerHTML = '';
+}
+
+document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+  const d2 = Number(document.getElementById('discount2Input').value);
+  const d3 = Number(document.getElementById('discount3Input').value);
+  const msgEl = document.getElementById('settingsMsg');
+
+  if (d2 > 18 || d3 > 18) {
+    msgEl.textContent = 'السقف الأقصى لأي خصم هو 18% — عشان العضوية تفضل دايمًا أوفر (زي §37)';
+    msgEl.className = 'error';
+    return;
+  }
+
+  const { error } = await supabase
+    .from('pricing_settings')
+    .update({ sibling_discount_2_pct: d2, sibling_discount_3_pct: d3, updated_at: new Date().toISOString() })
+    .eq('school_id', currentSchoolId);
+
+  msgEl.textContent = error ? `فشل الحفظ: ${error.message}` : '✓ اتحفظ';
+  msgEl.className = error ? 'error' : 'success';
+});
+
+document.getElementById('checkMismatchBtn').addEventListener('click', async () => {
+  const listEl = document.getElementById('mismatchList');
+  listEl.innerHTML = '<p class="muted">جاري الفحص...</p>';
+
+  const mismatches = await findMismatchedStudents(currentSchoolId);
+
+  if (mismatches.length === 0) {
+    listEl.innerHTML = '<p class="muted">كل المبالغ متطابقة مع قاعدة التسعير الحالية</p>';
+    return;
+  }
+
+  listEl.innerHTML = '';
+  for (const m of mismatches) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <strong>${m.name}</strong>
+      <div class="muted">المحفوظ: ${m.stored} — الصحيح: ${m.correct}${m.alreadyPaid ? ' — دفع جزء بالفعل (لن يتغير تلقائي)' : ''}</div>
+    `;
+    listEl.appendChild(card);
+  }
+});
+
+
 // ------------------------- التبويبات -------------------------
 
 document.querySelectorAll('nav.tabs button').forEach(btn => {
@@ -583,6 +644,7 @@ document.querySelectorAll('nav.tabs button').forEach(btn => {
     if (btn.dataset.tab === 'programs') await loadProgramsTab();
     if (btn.dataset.tab === 'deletions') await loadDeletionsTab();
     if (btn.dataset.tab === 'activity') await loadActivityTab();
+    if (btn.dataset.tab === 'pricing') await loadPricingTab();
   });
 });
 
